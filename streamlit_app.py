@@ -143,9 +143,18 @@ with col_result:
                     probabilities = data.get("probabilities", {})
                     heatmap_b64 = data.get("heatmap")
 
-                    # Primary Result Card
+                   # Primary Result Card with Uncertainty Warning
+                    is_uncertain = data.get("is_uncertain", False)
+
                     with st.container(border=True):
-                        badge = "<span class='badge-healthy'>HEALTHY LEAF</span>" if is_healthy else "<span class='badge-disease'>DISEASE DETECTED</span>"
+                        if is_uncertain:
+                            st.warning("⚠️ **Low Confidence Diagnostic Flag**: The prediction confidence is below the reliable threshold (65%). Please retake the leaf photograph under even lighting.")
+                            badge = "<span class='badge-disease' style='background: rgba(234, 179, 8, 0.2); color: #eab308; border-color: #eab308;'>INCONCLUSIVE / RETAKE</span>"
+                        elif is_healthy:
+                            badge = "<span class='badge-healthy'>HEALTHY LEAF</span>"
+                        else:
+                            badge = "<span class='badge-disease'>DISEASE DETECTED</span>"
+
                         st.markdown(f"""
                         <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;'>
                             <span style='color: #94a3b8; font-size: 0.9rem;'>Primary Pathology Diagnosis</span>
@@ -154,7 +163,6 @@ with col_result:
                         <h2 style='margin: 0; color: #ffffff;'>{disease}</h2>
                         """, unsafe_allow_html=True)
                         st.metric("Confidence Score", f"{confidence:.1f}%")
-
                     # Visual Heatmap (Explainable AI)
                     if heatmap_b64:
                         with st.container(border=True):

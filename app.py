@@ -13,7 +13,7 @@ import timm
 
 from advisory import get_treatment_plan
 
-app = FastAPI(title="PhytoVision AI - Plant Pathology API", version="2.0.0")
+app = FastAPI(title="PhytoVision AI - Plant Pathology API", version="2.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,14 +26,14 @@ app.add_middleware(
 # ----------------- MODEL SETUP -----------------
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CLASS_NAMES = ["angular_leaf_spot", "bean_rust", "healthy"]
+CONFIDENCE_THRESHOLD = 65.0  # Percentage threshold for low-confidence warnings
 
-# Load MobileNetV4
 model = timm.create_model("mobilenetv4_conv_small", pretrained=False, num_classes=len(CLASS_NAMES))
 try:
     state_dict = torch.load("models/mobilenetv4_plant_disease.pth", map_location=DEVICE)
     model.load_state_dict(state_dict)
 except Exception:
-    pass  # Fallback for CI testing environments
+    pass  # Graceful fallback for test/CI runners
 
 model.to(DEVICE)
 model.eval()
@@ -79,7 +79,6 @@ class GradCAM:
             cam = cam / cam.max()
         return cam, class_idx
 
-# Attach GradCAM to the last feature convolutional block
 target_layer = model.conv_head if hasattr(model, "conv_head") else list(model.children())[-2]
 grad_cam = GradCAM(model, target_layer)
 
@@ -96,7 +95,8 @@ def root():
     return {
         "status": "online",
         "model": "MobileNetV4",
-        "features": ["Classification", "Grad-CAM Localization", "Agronomic Advisory"],
+        "features": ["Classification", "Grad-CAM Localization", "Agronomic Advisory", "Confidence Guardrail"],
+        "confidence_threshold": CONFIDENCE_THRESHOLD,
         "device": str(DEVICE)
     }
 
@@ -111,7 +111,7 @@ async def diagnose(file: UploadFile = File(...)):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid or unreadable image file.")
 
-    # Model inference
+    # Forward pass and Grad-CAM generation
     input_tensor = transform(pil_image).unsqueeze(0).to(DEVICE)
     with torch.enable_grad():
         cam, pred_idx = grad_cam.generate(input_tensor)
@@ -120,25 +120,31 @@ async def diagnose(file: UploadFile = File(...)):
 
     predicted_label = CLASS_NAMES[pred_idx]
     confidence = float(probs[pred_idx] * 100)
+    is_uncertain = confidence < CONFIDENCE_THRESHOLD
 
-    # Generate Heatmap Overlay
+    # Heatmap Overlay construction
     orig_np = np.array(pil_image.resize((224, 224)))
     heatmap = cv2.applyColorMap(np.uint8(255 * cam), cv2.COLORMAP_JET)
     heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
     overlay = np.uint8(0.6 * orig_np + 0.4 * heatmap)
 
-    # Convert overlay to base64
     _, buffer = cv2.imencode(".png", cv2.cvtColor(overlay, cv2.COLOR_RGB2BGR))
     heatmap_base64 = base64.b64encode(buffer).decode("utf-8")
 
-    # Get structured agronomic treatment
-    treatment = get_treatment_plan(predicted_label)
+    # Structured Advisory or Uncertainty Guidance
+    treatment = get_treatment_plan(predicted_label) if not is_uncertain else {
+        "chemical": "Diagnosis uncertain. Do not apply chemical treatments without secondary lab verification.",
+        "organic": "Inspect foliar tissue under natural daylight; check for early spore formations.",
+        "prevention": "Retake the leaf photograph under even lighting against a neutral background."
+    }
+
     prob_dist = {CLASS_NAMES[i]: round(float(probs[i] * 100), 2) for i in range(len(CLASS_NAMES))}
 
     return {
-        "disease": predicted_label.replace("_", " ").title(),
+        "disease": "Inconclusive / Low Confidence" if is_uncertain else predicted_label.replace("_", " ").title(),
         "raw_label": predicted_label,
         "confidence": round(confidence, 2),
+        "is_uncertain": is_uncertain,
         "probabilities": prob_dist,
         "heatmap": heatmap_base64,
         "treatment": treatment
