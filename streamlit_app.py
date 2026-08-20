@@ -4,6 +4,7 @@ from PIL import Image
 import io
 import base64
 import plotly.express as px
+from pdf_report import generate_pdf_report
 
 # ----------------- PAGE CONFIG -----------------
 st.set_page_config(
@@ -69,7 +70,7 @@ st.markdown("""
     .advisory-organic { border-left: 4px solid #34d399; }
     .advisory-prevention { border-left: 4px solid #38bdf8; }
 
-    .stButton>button {
+    .stButton>button, .stDownloadButton>button {
         width: 100%;
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
@@ -208,6 +209,25 @@ with col_result:
                                 <span style='color: #cbd5e1;'>{treatment.get('prevention', 'N/A')}</span>
                             </div>
                             """, unsafe_allow_html=True)
+
+                    # Export PDF Report
+                    with st.container(border=True):
+                        st.markdown("#### 📄 Export Official Agronomy Report")
+                        raw_heatmap = base64.b64decode(heatmap_b64) if heatmap_b64 else None
+                        pdf_buffer = generate_pdf_report(
+                            disease_name=disease,
+                            confidence=confidence,
+                            treatment=treatment,
+                            orig_img_bytes=img_bytes,
+                            heatmap_img_bytes=raw_heatmap
+                        )
+                        st.download_button(
+                            label="📥 Download Diagnostic PDF Report",
+                            data=pdf_buffer,
+                            file_name=f"Pathology_Report_{disease.replace(' ', '_')}.pdf",
+                            mime="application/pdf"
+                        )
+
                 else:
                     st.error(f"API Error ({response.status_code}): {response.text}")
             except Exception as e:
