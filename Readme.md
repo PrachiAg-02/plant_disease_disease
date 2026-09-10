@@ -1,31 +1,32 @@
-# 🌿 PhytoVision AI: Plant Pathology Diagnostic & Explainable Advisory Platform
+# 🌾 PhytoVision AI: Enterprise Agritech Diagnostic & Severity Engine
 
-[![CI Pipeline](https://github.com/PrachiAg-02/plant_disease_disease/actions/workflows/ci.yml/badge.svg)](https://github.com/PrachiAg-02/plant_disease_disease/actions)
-![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)
-![Framework](https://img.shields.io/badge/PyTorch-MobileNetV4-EE4C2C.svg)
-![Backend](https://img.shields.io/badge/FastAPI-Sub--50ms-009688.svg)
-![UI](https://img.shields.io/badge/Frontend-Streamlit-FF4B4B.svg)
-![Edge](https://img.shields.io/badge/Edge-ONNX_Runtime-005CED.svg)
-
-An Explainable AI (XAI) computer vision pipeline engineered for foliar crop disease diagnosis, localized lesion heatmapping, and structured agronomic intervention plans.
+> **Solution Challenge 2026 – Build with AI**  
+> An enterprise-grade, containerized computer vision platform designed for real-time crop disease detection, severity quantification, and automated agronomic reporting.
 
 ---
 
-## 🏗️ System Architecture
+## 🚀 Overview
+PhytoVision AI bridges the gap between advanced deep learning and practical agricultural management. Utilizing optimized **ONNX runtime models** combined with a high-performance **FastAPI** backend and an interactive **Streamlit** enterprise dashboard, the platform enables agronomists and farmers to rapidly diagnose crop pathologies, calculate precise infection severities, and generate actionable multi-lingual PDF reports.
 
+---
+
+## 🛠️ Tech Stack & Architecture
+
+* **Frontend:** Streamlit (Enterprise Dashboard UI)
+* **Backend:** FastAPI (Async RESTful API Services)
+* **Core Intelligence:** Computer Vision, ONNX Runtime (Optimized Inference Engine)
+* **Deployment & Containerization:** Docker & Docker Compose (Multi-container orchestration)
+* **Reporting:** Automated PDF generation with localized insights
+
+---
+
+## 📂 Project Structure
 ```text
-Image upload
-     │
-     ▼
-Image validation (Format: JPG/PNG, Size: <10MB)
-     │
-     ▼
-Preprocessing (Resize 224x224, ImageNet Normalization)
-     │
-     ▼
-ONNX / MobileNetV4 inference (Sub-10ms latency)
-     │
-     ▼
-Confidence threshold (Threshold: 65.0%)
-     ├── Low confidence (<65%)  ──► Inconclusive warning & retake guidance
-     └── Accepted result (≥65%) ──► Disease classification + Grad-CAM heatmap + Agronomic Advisory PDF
+plant_disease_disease/
+├── app.py                  # Streamlit Frontend Application
+├── main.py                 # FastAPI Backend & Inference Engine
+├── Dockerfile.backend      # Container configuration for FastAPI
+├── Dockerfile.frontend     # Container configuration for Streamlit
+├── docker-compose.yml      # Multi-container orchestration setup
+├── requirements.txt        # Python dependencies
+└── .dockerignore           # Build optimization rules
