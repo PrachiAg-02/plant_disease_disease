@@ -56,7 +56,7 @@ def get_or_create_tenant(db: Session, api_key: str):
 
 
 # ----------------- INFERENCE ENGINE SETUP -----------------
-MODEL_PATH = "models/mobilenetv4_plant_disease.onnx"
+MODEL_PATH = "models/mobilenetv4_combined.onnx"
 try:
     session = ort.InferenceSession(MODEL_PATH)
     input_name = session.get_inputs()[0].name
@@ -66,9 +66,22 @@ except Exception as e:
 
 # Define actual class mappings based on your model
 CLASS_NAMES = [
-    "Angular Leaf Spot",
-    "Bean Rust",
-    "Healthy"
+    'Apple__Healthy', 
+    'Apple__Rotten', 
+    'Apple___Apple_scab', 
+    'Apple___Black_rot', 
+    'Apple___Cedar_apple_rust', 
+    'Apple___healthy', 
+    'Banana__Healthy', 
+    'Banana__Rotten', 
+    'Orange__Healthy', 
+    'Orange__Rotten', 
+    'Tomato__Healthy', 
+    'Tomato__Rotten', 
+    'Tomato___Bacterial_spot', 
+    'Tomato___Early_blight', 
+    'Tomato___healthy'
+
 ]
 
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
