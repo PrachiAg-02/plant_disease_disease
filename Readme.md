@@ -1,6 +1,5 @@
 # 🌾 PhytoVision AI: Enterprise Agritech Diagnostic & Severity Engine
 
-> **Solution Challenge 2026 – Build with AI**  
 > An enterprise-grade, containerized computer vision platform designed for real-time crop disease detection, severity quantification, and automated agronomic reporting.
 
 ---

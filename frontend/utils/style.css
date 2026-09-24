@@ -1,0 +1,49 @@
+/* Custom color scheme */
+:root {
+    --primary-color: #2ECC71;
+    --secondary-color: #3498DB;
+    --danger-color: #E74C3C;
+    --warning-color: #F39C12;
+    --success-color: #27AE60;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Custom card styling */
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Button styling */
+.stButton > button {
+    background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+}
+
+/* Alert/Info box styling */
+.stAlert {
+    border-radius: 6px;
+    padding: 15px;
+}
