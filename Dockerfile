@@ -12,10 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
-COPY . .
 
-EXPOSE 8000
-EXPOSE 8501
+# Copy your start script and make it executable
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Run the startup script
+CMD ["./start.sh"]
