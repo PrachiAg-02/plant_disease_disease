@@ -1,0 +1,8 @@
+﻿.env
+venv/
+__pycache__/
+models/
+*.pth
+*.h5
+*.db
+flagged_samples/
